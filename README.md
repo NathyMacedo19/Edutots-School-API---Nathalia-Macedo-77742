@@ -290,6 +290,6 @@ https://github.com/NathyMacedo19/Edutots-School-API---Nathalia-Macedo-77742.git
 
 Author
 Nathalia Macedo
-CA1 Assignment School Directory Dashboard using the Edutots School API
+
 
 
