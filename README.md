@@ -283,49 +283,6 @@ dotnet run
 
 ---
 
-## Screenshots
-
-The following screenshots demonstrate the main functionality of the application.
-
-### 1. School List
-
-The school directory displaying schools retrieved from the Edutots API.
-
-![School List](screenshots/school-list.png)
-
----
-
-### 2. Search Functionality
-
-Searching for a school by name.
-
-![Search Functionality](screenshots/search.png)
-
----
-
-### 3. School Details
-
-Detailed information displayed after selecting a school.
-
-![School Details](screenshots/school-details.png)
-
----
-
-### 4. Loading State
-
-Loading feedback displayed while school data is being retrieved.
-
-![Loading State](screenshots/loading.png)
-
----
-
-### 5. Error State
-
-Error message displayed when the API request cannot be completed.
-
-![Error State](screenshots/error.png)
-
----
 
 ## Assignment Requirements
 
