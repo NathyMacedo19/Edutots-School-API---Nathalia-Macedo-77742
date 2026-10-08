@@ -284,48 +284,12 @@ dotnet run
 ---
 
 
-## Assignment Requirements
-
-This project addresses the following CA1 requirements:
-
-Requirement	Implemented
-Consume Edutots School API	Yes
-Deserialize JSON into C# model	Yes
-Display school information	Yes
-Search by school name	Yes
-School details	Yes
-Loading state	Yes
-Error handling	Yes
-Reusable Blazor component	Yes
-[Parameter] School	Yes
-EventCallback<School>	Yes
-GitHub repository	Yes
-README documentation	Yes
-Distinction Features
-Additional features were implemented to improve the application beyond the basic requirements:
-
-Responsive Bootstrap design
-Alphabetical sorting
-Favourite schools
-Refresh button
-School statistics dashboard
-Interactive school details
-Responsive table layout
-Clickable telephone and email links
-GitHub Repository
 The source code and commit history are available on GitHub:
 
 https://github.com/NathyMacedo19/Edutots-School-API---Nathalia-Macedo-77742.git
 
 Author
 Nathalia Macedo
-
 CA1 Assignment School Directory Dashboard using the Edutots School API
 
-
-## Uma alteração importante antes de usar
-
-No README acima coloquei:
-
-screenshots/ ├── school-list.png ├── search.png ├── school-details.png ├── loading.png └── error.png
 
