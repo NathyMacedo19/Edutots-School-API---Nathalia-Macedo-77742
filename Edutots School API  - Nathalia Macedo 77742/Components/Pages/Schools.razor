@@ -1,0 +1,208 @@
+﻿@page "/schools"
+@inject SchoolService Service
+@inject FavouritesService Favourites
+
+<PageTitle>School Directory</PageTitle>
+
+<div class="mb-4">
+    <h1 class="page-title">School Directory</h1>
+    <p class="text-muted mb-0">Browse and search schools from the Edutots School API.</p>
+</div>
+
+@* Search, sort, favourites filter and refresh *@
+<div class="card panel mb-3">
+    <div class="card-body">
+        <div class="row g-2 align-items-center">
+            <div class="col-lg-5">
+                <input @bind="Search"
+                       @bind:event="oninput"
+                       class="form-control"
+                       placeholder="Search school..." />
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <select class="form-select" @bind="sortOrder">
+                    <option value="asc">Name A → Z</option>
+                    <option value="desc">Name Z → A</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           id="favOnly" @bind="showFavouritesOnly" />
+                    <label class="form-check-label" for="favOnly">Favourites only</label>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-3">
+                <button class="btn btn-primary w-100" @onclick="LoadSchools">Refresh</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (error)
+{
+    @* if the API call failed *@
+    <div class="alert alert-danger" role="alert">
+        Unable to retrieve school data.
+    </div>
+}
+else if (schools == null)
+{
+    @* waiting for the data *@
+    <div class="text-center text-muted py-5">
+        <div class="spinner-border spinner-border-sm me-2" aria-hidden="true"></div>
+        Loading schools...
+    </div>
+}
+else
+{
+    @* The schools after search, filter and sort *@
+    var filtered = FilteredSchools.ToList();
+
+    @* Statistics *@
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <div class="card panel stat-card">
+                <div class="card-body">
+                    <div class="stat-label">Total schools</div>
+                    <div class="stat-value">@schools.Count</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card panel stat-card green">
+                <div class="card-body">
+                    <div class="stat-label">Showing now</div>
+                    <div class="stat-value">@filtered.Count</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card panel stat-card amber">
+                <div class="card-body">
+                    <div class="stat-label">Favourites</div>
+                    <div class="stat-value">@Favourites.Count</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Table of schools *@
+    <div class="card panel overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 school-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>School Name</th>
+                        <th>Address</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Proprietor</th>
+                        <th>Head</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var school in filtered)
+                    {
+                        <SchoolCard School="school"
+                                    IsFavourite="@Favourites.IsFavourite(school.SchoolId)"
+                                    OnSelect="ShowDetails"
+                                    OnToggleFavourite="ToggleFavourite" />
+                    }
+
+                    @if (!filtered.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">No schools found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="text-muted small mt-2">Click a school to see its details.</p>
+}
+
+@* Pop-up with the details of the selected school *@
+@if (selectedSchool != null)
+{
+    <SchoolDetails School="selectedSchool" OnClose="CloseDetails" />
+}
+
+@code {
+    private List<School>? schools;             // all schools (null = still loading)
+    private School? selectedSchool;             // the clicked school (null = no pop-up)
+    private bool error;                         // true if the API failed
+    private string Search { get; set; } = string.Empty;  // what the user typed
+    private string sortOrder = "asc";           // "asc" = A to Z, "desc" = Z to A
+    private bool showFavouritesOnly;            // is "Favourites only" switched on?
+
+    // Search, then favourites filter, then sort
+    private IEnumerable<School> FilteredSchools
+    {
+        get
+        {
+            // Keep schools whose name contains the search text
+            var result = schools!.Where(s =>
+                s.SchoolName.Contains(Search, StringComparison.OrdinalIgnoreCase));
+
+            // Keep only favourites if the switch is on
+            if (showFavouritesOnly)
+            {
+                result = result.Where(s => Favourites.IsFavourite(s.SchoolId));
+            }
+
+            // Sort by name
+            return sortOrder == "asc"
+                ? result.OrderBy(s => s.SchoolName, StringComparer.OrdinalIgnoreCase)
+                : result.OrderByDescending(s => s.SchoolName, StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    // Runs when the page opens
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSchools();
+    }
+
+    // Gets the schools from the API
+    private async Task LoadSchools()
+    {
+        error = false;
+        schools = null;         // shows "Loading..."
+        selectedSchool = null;
+
+        try
+        {
+            schools = await Service.GetSchoolsAsync();
+        }
+        catch
+        {
+            error = true;       // shows the error message
+        }
+    }
+
+    // A row was clicked: open the pop-up
+    private void ShowDetails(School school)
+    {
+        selectedSchool = school;
+    }
+
+    // The pop-up was closed
+    private void CloseDetails()
+    {
+        selectedSchool = null;
+    }
+
+    // A star was clicked: add or remove the favourite
+    private void ToggleFavourite(School school)
+    {
+        Favourites.Toggle(school.SchoolId);
+    }
+}

@@ -1,0 +1,166 @@
+@page "/"
+@inject SchoolService Service
+@inject FavouritesService Favourites
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="mb-4">
+	<h1 class="page-title">Dashboard</h1>
+	<p class="text-muted mb-0">An overview of the schools from the Edutots School API.</p>
+</div>
+
+@if (error)
+{
+	<div class="alert alert-danger" role="alert">
+		Unable to retrieve school data.
+	</div>
+}
+else if (schools == null)
+{
+	<div class="text-center text-muted py-5">
+		<div class="spinner-border spinner-border-sm me-2" aria-hidden="true"></div>
+		Loading schools...
+	</div>
+}
+else
+{
+	@* Real numbers worked out from the API data *@
+	<div class="row g-3 mb-3">
+		<div class="col-md-3 col-6">
+			<div class="card panel stat-card">
+				<div class="card-body">
+					<div class="stat-label">Total schools</div>
+					<div class="stat-value">@schools.Count</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3 col-6">
+			<div class="card panel stat-card green">
+				<div class="card-body">
+					<div class="stat-label">With email</div>
+					<div class="stat-value">@WithEmail</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3 col-6">
+			<div class="card panel stat-card">
+				<div class="card-body">
+					<div class="stat-label">Proprietors</div>
+					<div class="stat-value">@ProprietorCount</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3 col-6">
+			<div class="card panel stat-card amber">
+				<div class="card-body">
+					<div class="stat-label">Favourites</div>
+					<div class="stat-value">@Favourites.Count</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row g-3">
+
+n        @* Favourite schools (shared with the Schools page) *@
+		<div class="col-lg-7">
+			<div class="card panel h-100">
+				<div class="card-body">
+					<h5 class="mb-3">Your favourite schools</h5>
+
+					@if (!FavouriteSchools.Any())
+					{
+						<p class="text-muted mb-0">
+							No favourites yet. Star a school on the
+							<a href="schools">Schools page</a> and it will appear here.
+						</p>
+					}
+					else
+					{
+						<ul class="list-group list-group-flush">
+							@foreach (var school in FavouriteSchools)
+							{
+								<li class="list-group-item px-0">
+									<div class="fw-semibold">@school.SchoolName</div>
+									<small class="text-muted">@school.Address</small>
+								</li>
+							}
+						</ul>
+					}
+				</div>
+			</div>
+		</div>
+
+n        @* Made-up numbers, clearly labelled as sample data *@
+		<div class="col-lg-5">
+			<div class="card panel h-100">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<h5 class="mb-0">Total enrolment</h5>
+						<span class="badge bg-secondary">Sample data</span>
+					</div>
+
+n                    @foreach (var item in sampleEnrolment)
+					{
+						var percent = item.Students * 100 / maxStudents;
+
+n                        <div class="mb-2">
+							<div class="d-flex justify-content-between small">
+								<span>@item.Year</span>
+								<span class="text-muted">@item.Students students</span>
+							</div>
+							<div class="progress" style="height: 8px;">
+								<div class="progress-bar" style="width: @(percent)%"></div>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+
+n    </div>
+}
+
+n@code {
+	private List<School>? schools;   // null = still loading
+	private bool error;              // true if the API failed
+
+	// Made-up numbers, just to fill the chart
+	private readonly (string Year, int Students)[] sampleEnrolment =
+	{
+		("2021", 640),
+		("2022", 720),
+		("2023", 810),
+		("2024", 865),
+		("2025", 940)
+	};
+
+	private int maxStudents => sampleEnrolment.Max(x => x.Students);
+
+	// Schools that have an email address
+	private int WithEmail =>
+		schools!.Count(s => !string.IsNullOrWhiteSpace(s.EmailAddress));
+
+	// How many different proprietors there are (ignores empty names and upper/lower case)
+	private int ProprietorCount =>
+		schools!.Select(s => s.ProprietorFullName)
+				.Where(name => !string.IsNullOrWhiteSpace(name))
+				.Distinct(StringComparer.OrdinalIgnoreCase)
+				.Count();
+
+	// The schools the user starred
+	private IEnumerable<School> FavouriteSchools =>
+		schools!.Where(s => Favourites.IsFavourite(s.SchoolId));
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			schools = await Service.GetSchoolsAsync();
+		}
+		catch
+		{
+			error = true;
+		}
+	}
+}

@@ -1,0 +1,140 @@
+﻿@page "/"
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="d-flex align-items-center mb-4">
+  <h1 class="me-auto page-title">Dashboard</h1>
+  <div>
+    <button class="btn btn-outline-secondary me-2" @onclick="Reload">Refresh</button>
+  </div>
+</div>
+
+@if (error)
+{
+  <div class="alert alert-danger" role="alert">Unable to retrieve school data.</div>
+}
+else if (schools == null)
+{
+  <div class="text-center text-muted py-5">
+    <div class="spinner-border spinner-border-sm me-2" aria-hidden="true"></div>
+    Loading schools...
+  </div>
+}
+else
+{
+  <div class="stats-row mb-4 d-flex gap-3 flex-nowrap overflow-auto">
+    <div class="card stat-card p-3">
+      <div class="small text-muted">Total schools</div>
+      <div class="h4 mb-0">@schools.Count</div>
+    </div>
+    <div class="card stat-card p-3 bg-success text-white">
+      <div class="small text-muted">With email</div>
+      <div class="h4 mb-0">@WithEmail</div>
+    </div>
+    <div class="card stat-card p-3">
+      <div class="small text-muted">Proprietors</div>
+      <div class="h4 mb-0">@ProprietorCount</div>
+    </div>
+    <div class="card stat-card p-3 bg-warning">
+      <div class="small text-muted">Favourites</div>
+      <div class="h4 mb-0">@Favourites.Count</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <h5>Your favourite schools</h5>
+          @if (!FavouriteSchools.Any())
+          {
+            <p class="text-muted">No favourites yet. Go to <a href="/schools">Schools</a>.</p>
+          }
+          else
+          {
+            <ul class="list-group list-group-flush">
+              @foreach (var s in FavouriteSchools)
+              {
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                  <div>
+                    <div class="fw-semibold">@s.SchoolName</div>
+                    <small class="text-muted">@s.Address</small>
+                  </div>
+                  <div class="text-end">
+                    <button class="btn btn-sm btn-link" @onclick="() => ShowDetails(s)">Details</button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-body">
+          <div class="d-flex mb-2">
+            <input class="form-control me-2" placeholder="Search schools..." @bind="searchText" />
+            <select class="form-select" style="width: 180px" @bind="sortBy">
+              <option value="name">Name</option>
+              <option value="proprietor">Proprietor</option>
+            </select>
+          </div>
+
+          <div class="row row-cols-1 row-cols-md-2 g-2">
+            @foreach (var s in FilteredSchools)
+            {
+              <div class="col">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                      <div>
+                        <div class="fw-semibold">@s.SchoolName</div>
+                        <small class="text-muted">@s.Address</small>
+                      </div>
+                      <div>
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowDetails(s)">View</button>
+                        <button class="btn btn-sm btn-outline-warning" @onclick="() => ToggleFavourite(s)">
+                          @(Favourites.IsFavourite(s.SchoolId) ? "★" : "☆")
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6>Enrollment (sample)</h6>
+          @foreach (var e in sampleEnrolment)
+          {
+            var pct = e.Students * 100 / maxStudents;
+            <div class="mb-2 small">
+              <div class="d-flex justify-content-between">
+                <span>@e.Year</span><span class="text-muted">@e.Students</span>
+              </div>
+              <div class="progress" style="height:8px">
+                <div class="progress-bar" style="width:@pct%"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h6>Quick Filters</h6>
+          <div class="btn-group-vertical w-100">
+            <button class="btn btn-outline-secondary" @onclick="() => searchText = string.Empty">All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

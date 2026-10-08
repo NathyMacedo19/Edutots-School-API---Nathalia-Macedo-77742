@@ -1,0 +1,55 @@
+﻿<div class="modal fade show d-block" tabindex="-1"
+     style="background-color: rgba(0, 0, 0, 0.5);"
+     @onclick="OnClose">
+
+   
+    <div class="modal-dialog modal-dialog-centered" @onclick:stopPropagation="true">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">@School.SchoolName</h5>
+                <button type="button" class="btn-close btn-close-white" @onclick="OnClose"></button>
+            </div>
+
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">School ID</dt>
+                    <dd class="col-sm-8">@School.SchoolId</dd>
+
+                    <dt class="col-sm-4">School Name</dt>
+                    <dd class="col-sm-8">@School.SchoolName</dd>
+
+                    <dt class="col-sm-4">Address</dt>
+                    <dd class="col-sm-8">@School.Address</dd>
+
+                    <dt class="col-sm-4">Phone No</dt>
+                    <dd class="col-sm-8"><a href="tel:@School.PhoneNo">@School.PhoneNo</a></dd>
+
+                    <dt class="col-sm-4">Email Address</dt>
+                    <dd class="col-sm-8"><a href="mailto:@School.EmailAddress">@School.EmailAddress</a></dd>
+
+                    <dt class="col-sm-4">Proprietor</dt>
+                    <dd class="col-sm-8">@School.ProprietorFullName</dd>
+
+                    <dt class="col-sm-4">Head</dt>
+                    <dd class="col-sm-8 mb-0">@School.HeadFullName</dd>
+                </dl>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="OnClose">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    // The school to show (sent by the page)
+    [Parameter]
+    public School School { get; set; } = new();
+
+    // Tells the page to close the pop-up
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+}

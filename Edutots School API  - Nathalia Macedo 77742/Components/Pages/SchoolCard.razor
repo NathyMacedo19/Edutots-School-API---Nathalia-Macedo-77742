@@ -1,0 +1,43 @@
+﻿<tr class="school-row" @onclick="() => OnSelect.InvokeAsync(School)">
+    <td class="text-muted">@School.SchoolId</td>
+    <td class="fw-semibold" style="min-width: 180px;">@School.SchoolName</td>
+
+    @* Long text is shortened with "..." and the full text shows on hover *@
+    <td class="text-muted">
+        <div class="cell-clamp" title="@School.Address">@School.Address</div>
+    </td>
+    <td class="text-nowrap">@School.PhoneNo</td>
+    <td class="text-muted">
+        <div class="cell-clamp" title="@School.EmailAddress">@School.EmailAddress</div>
+    </td>
+    <td>@School.ProprietorFullName</td>
+    <td>@School.HeadFullName</td>
+
+    <td class="text-end">
+        @* Star button *@
+        <button class="star-btn @(IsFavourite ? "" : "off")"
+                title="@(IsFavourite ? "Remove from favourites" : "Add to favourites")"
+                @onclick="() => OnToggleFavourite.InvokeAsync(School)"
+                @onclick:stopPropagation="true">
+            @(IsFavourite ? "★" : "☆")
+        </button>
+    </td>
+</tr>
+
+@code {
+    // The school shown in this row 
+    [Parameter]
+    public School School { get; set; } = new();
+
+    //if the school is a favourite fills in the star)
+    [Parameter]
+    public bool IsFavourite { get; set; }
+
+	// Tells the page to show the details of the clicked school
+    [Parameter]
+    public EventCallback<School> OnSelect { get; set; }
+
+    // Tells the page the star was clicked
+    [Parameter]
+    public EventCallback<School> OnToggleFavourite { get; set; }
+}
